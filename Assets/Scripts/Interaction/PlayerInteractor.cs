@@ -24,7 +24,6 @@ public class PlayerInteractor : MonoBehaviour
 
     private void Update()
     {
-        // Only allow interactions in FreeRoam.
         var gsm = GameStateManager.Instance;
         if (gsm != null && !gsm.IsState(GameState.FreeRoam))
             return;
@@ -46,7 +45,7 @@ public class PlayerInteractor : MonoBehaviour
             var ray = new Ray(_cam.transform.position, _cam.transform.forward);
             if (Physics.Raycast(ray, out var hit, _interactionDistance, _interactionMask, QueryTriggerInteraction.Ignore))
             {
-                hit.collider.TryGetComponent<IInteractable>(out newInteractable);
+                newInteractable = FindInteractableOnCollider(hit.collider);
             }
         }
 
@@ -55,12 +54,22 @@ public class PlayerInteractor : MonoBehaviour
             _currentInteractable = newInteractable;
             OnFocusedInteractableChanged?.Invoke(_currentInteractable);
 
-            // For now, just logging but later I will hook this into HUD.
             if (_currentInteractable != null)
             {
                 Debug.Log($"Looking at: {_currentInteractable.GetInteractionPrompt()}");
             }
         }
+    }
+
+    private static IInteractable FindInteractableOnCollider(Collider col)
+    {
+        var behaviours = col.GetComponents<MonoBehaviour>();
+        for (int i = 0; i < behaviours.Length; i++)
+        {
+            if (behaviours[i] is IInteractable interactable)
+                return interactable;
+        }
+        return null;
     }
 
     private void TryInteract()
