@@ -1,3 +1,5 @@
+// NPCInteraction v2
+
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -29,11 +31,18 @@ public class NPCInteraction : MonoBehaviour, IInteractable
             return;
         }
 
-        // Switch to InteractionMenu state. Later I’ll hook this into UI.
-        var gsm = GameStateManager.Instance;
-        if (gsm != null)
+        var ui = UIManager.Instance;
+        if (ui != null)
         {
-            gsm.SetState(GameState.InteractionMenu);
+            ui.ShowInteractionMenu(this);
+        }
+        else
+        {
+            var gsm = GameStateManager.Instance;
+            if (gsm != null)
+            {
+                gsm.SetState(GameState.InteractionMenu);
+            }
         }
 
         Debug.Log($"Interacting with suspect: {_suspectData.DisplayName} (ID: {_suspectData.SuspectId})");
